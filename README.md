@@ -1,149 +1,67 @@
 # Saudi Tennis Federation Data Warehouse
 
-## Overview
-This repository contains SQL scripts to set up a comprehensive data warehouse for the Saudi Tennis Federation. The data warehouse organizes information about players, coaches, referees, clubs, and academies registered with the federation. The structure follows a dimensional model design pattern (star schema) optimized for analytical queries and reporting.
-
 ![Image](https://github.com/user-attachments/assets/d57e4b7f-7ded-41fd-9d59-72ba851f242b)
 
 
-## Data Description
-The data warehouse contains the following federation statistics:
-- **Players**: 2,551 registered players
-- **Coaches**: 355 registered coaches
-- **Referees**: 216 registered referees
-- **Clubs**: 132 registered clubs
-- **Academies**: 8 registered academies
+## Overview
+This SQL script creates and populates a database containing referees, coaches, players, and football clubs/academies. It is designed to be used for managing football-related entities and statistics.
 
-## Database Schema
+## Database Structure
 
-### Dimension Tables
-1. **dim_date**: Time dimension for tracking statistics over time
-   - Includes date hierarchies (day, month, quarter, year)
-   - Supports time-based analysis and reporting
+### Tables:
+- **Referees**: Stores the total number of referees.
+- **Coaches**: Stores the total number of coaches.
+- **Players**: Stores the total number of players.
+- **Clubs_Academies**: Stores information about clubs and academies.
 
-2. **dim_location**: Geographic dimension for spatial analysis
-   - Designed for future location-based analytics
-   - Includes city, region, and country fields
-
-3. **dim_entity**: Contains all tennis clubs and academies
-   - 140 total entities (132 clubs and 8 academies)
-   - Each entity has a unique identifier, name, and type
-
-4. **dim_personnel**: Structure for individual people data
-   - Supports role-based categorization (player, coach, referee)
-   - Includes demographic information
-
-### Fact Tables
-1. **fact_federation_stats**: Contains aggregated statistics
-   - Links to the date dimension for temporal tracking
-   - Stores count metrics for all major entity types
-   - Supports historical tracking of federation growth
-
-### Views
-1. **vw_federation_overview**: Provides summary statistics with calculated ratios
-   - Coach-to-player ratio
-   - Referee-to-player ratio
-   - Overall federation metrics
-
-2. **vw_entity_listing**: Lists all clubs and academies
-   - Includes both English and Arabic entity type labels
-   - Sorted by entity type and name for easy browsing
-
-## Sample Queries
-
-### Get Overall Federation Statistics
+## SQL Schema
 ```sql
-SELECT * FROM vw_federation_overview;
-```
+CREATE TABLE Referees (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    total_referees INT NOT NULL
+);
 
-### Count Entities by Type
-```sql
-SELECT entity_type, COUNT(*) as count 
-FROM dim_entity 
-GROUP BY entity_type;
-```
+CREATE TABLE Coaches (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    total_coaches INT NOT NULL
+);
 
-### Calculate Coach to Player Ratio
-```sql
-SELECT ROUND(total_coaches / total_players * 100, 2) AS coach_player_ratio_percentage 
-FROM fact_federation_stats 
-WHERE stats_id = 1;
-```
+CREATE TABLE Players (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    total_players INT NOT NULL
+);
 
-### List All Clubs
-```sql
-SELECT entity_id, entity_name 
-FROM dim_entity 
-WHERE entity_type = 'Club' 
-ORDER BY entity_name;
-```
-
-### List All Academies
-```sql
-SELECT entity_id, entity_name 
-FROM dim_entity 
-WHERE entity_type = 'Academy' 
-ORDER BY entity_name;
-```
-
-## Data Maintenance
-
-The data warehouse includes a stored procedure for updating statistics:
-
-```sql
--- Example usage
-EXEC update_federation_stats(
-    p_players => 2600,    -- New total player count
-    p_coaches => 360,     -- New total coach count
-    p_referees => 220,    -- New total referee count
-    p_clubs => 135,       -- New total club count
-    p_academies => 10     -- New total academy count
+CREATE TABLE Clubs_Academies (
+    id INT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    type ENUM('Club', 'Academy') NOT NULL
 );
 ```
 
-## Setup Instructions
+## Sample Data
+```sql
+INSERT INTO Referees (total_referees) VALUES (216);
+INSERT INTO Coaches (total_coaches) VALUES (355);
+INSERT INTO Players (total_players) VALUES (2551);
 
- **Verify Installation**
-   - Run `SELECT table_name FROM user_tables;` to confirm all tables were created
-   - Run `SELECT * FROM vw_federation_overview;` to view federation statistics
+INSERT INTO Clubs_Academies (id, name, type) VALUES (1, 'الانوار', 'Club');
+INSERT INTO Clubs_Academies (id, name, type) VALUES (2, 'احد', 'Club');
+INSERT INTO Clubs_Academies (id, name, type) VALUES (3, 'الابتسام', 'Club');
+INSERT INTO Clubs_Academies (id, name, type) VALUES (4, 'الاتحاد', 'Club');
+INSERT INTO Clubs_Academies (id, name, type) VALUES (5, 'الاتفاق', 'Club');
+...
+```
 
-## Entity List
+## Usage Instructions
+1. Copy and paste the SQL schema into your MySQL or MariaDB database.
+2. Run the insert queries to populate the tables with sample data.
+3. Use SQL queries to retrieve, update, or analyze data as needed.
 
-The data warehouse contains 140 entities (132 clubs and 8 academies). Some notable examples:
-
-### Major Clubs
-- Al Hilal
-- Al Nasr
-- Al Ittihad
-- Al Ahli
-- Al Shabab
-- NEOM
-
-### Academies
-- Tennis Point
-- Match Point
-- DJTA - Dhahran Aramco Academy
-- Red Sea
-- Fighters
-
-## Future Enhancements
-
-The current data warehouse can be extended in several ways:
-
-1. **Add Player Performance Metrics**
-   - Track match results, rankings, and performance over time
-
-2. **Geospatial Analysis**
-   - Add coordinates to enable geographic visualization and analysis
-
-3. **Tournament Management**
-   - Add tournament dimensions and facts to track competition results
-
-4. **Training Programs**
-   - Track coaching programs, participants, and outcomes
-
-5. **Equipment and Facilities**
-   - Add dimensions for managing tennis facilities and equipment
+## Notes
+- The `id` column in `Clubs_Academies` must be unique.
+- The `type` column allows only 'Club' or 'Academy'.
+- Modify or expand the dataset as needed for additional functionality.
 
 ## License
-This project is licensed under the MIT License - see the LICENSE file for details.
+This dataset is provided under the MIT License. Feel free to use and modify it for your projects.
+
